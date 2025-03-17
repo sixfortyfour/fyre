@@ -3,36 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basic HTML Page</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Fyre</title>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css">
+    <script src="https://use.fontawesome.com/834dd83dda.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
-    <header>
-        <h1>Welcome to My Website</h1>
-    </header>
-    <nav>
-        <ul>
-            <li><a href="#home">Home</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
-        </ul>
-    </nav>
-    <main>
-        <section id="home">
-            <h2>Home</h2>
-            <p>This is the home section.</p>
-        </section>
-        <section id="about">
-            <h2>About</h2>
-            <p>This is the about section.</p>
-        </section>
-        <section id="contact">
-            <h2>Contact</h2>
-            <p>This is the contact section.</p>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2023 My Website</p>
-    </footer>
+    <div class="flex flex-col min-h-screen">
+        <header class="p-5 bg-gray-700 text-white">
+            <nav>
+                <div class="text-3xl font-bold">
+                Fyre <i class="fa fa-solid fa-fire" style="color: #ff8040;"></i>
+                </div>
+            </nav>
+        </header>
+        <main class="flex-grow" x-data>
+            <div class="relative mx-auto max-w-2xl px-6">
+                <div class="flex flex-col items-center justify-center py-12">
+                    <h1 class="text-3xl text-center font-bold pb-4" style="color: #ff8040;">Short lived messages that burn away</h1>
+                    <p class="text-gray-600 pb-4">
+                        With Fyre, you can send messages using short-lived, one-time links that burn away after an hour or as soon as they’re viewed.
+                        
+                    </p>
+                    <p class="text-gray-600">
+                        An experimental project inspired by <a href="https://pyre.link/" class="text-blue-600 hover:underline" target="_blank">Pyre</a> and <a href="https://envflow.laravel.cloud/" class="text-blue-600 hover:underline" target="_blank">EnvFlow</a> using <a href="https://upstash.com/" class="text-blue-600 hover:underline" target="_blank">Upstash Redis</a> as the data store.
+                    </p>
+                </div>
+                <form x-data="messageForm()" @submit.prevent="submitForm">
+                    <div class="grid gap-6">
+                        <textarea name="message" required x-model="formData.message" class="w-full h-96 p-4" rows="10" placeholder="Paste your secret here..."></textarea>
+                        <button class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Get link</button>
+                    </div>
+                    <div x-text="formMessage"></div>
+                </form>
+            </div>
+        </main>
+        <footer class="sticky z-50 bg-gray-700 text-white bottom-0 p-4">
+            <p>&copy; 2025 sixfortyfour</p>
+        </footer>
+    </div>
+    <script>
+        function messageForm() {
+                return {
+                    formData: {
+                    message: "",
+                },
+                formMessage: "",
+                submitForm() {
+                    console.log('Submitting form');
+                    this.formMessage = "";
+                    fetch(`/api/encryptfunction`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                        },
+                        body: JSON.stringify(this.formData),
+                    }).then(() => {
+                        this.formData.message = "";
+                        this.formMessage = "Form successfully submitted.";
+                    }).catch(() => {
+                        this.formMessage = "An error occurred. Please try again.";
+                    });
+                }
+        }};
+    </script>
 </body>
 </html>
