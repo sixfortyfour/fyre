@@ -1,5 +1,5 @@
 const { app } = require('@azure/functions');
-//const { Redis } = require('@upstash/redis');
+const { Redis } = require('@upstash/redis');
 
 /*
 const redis = new Redis({
