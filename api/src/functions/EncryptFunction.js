@@ -1,6 +1,5 @@
 const { app } = require('@azure/functions');
 const { Redis } = require('@upstash/redis');
-require('dotenv').config();
 
 const redis = new Redis({
     url: process.env.UPSTASH_REDIS_REST_URL,
