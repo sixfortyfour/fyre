@@ -1,5 +1,5 @@
 const { app } = require('@azure/functions');
-const { Redis } = require('@upstash/redis');
+const { Redis, RandomKeyCommand } = require('@upstash/redis');
 
 const redis = new Redis({
     url: process.env.UPSTASH_REDIS_REST_URL,
@@ -10,12 +10,17 @@ app.http('encrypt', {
     methods: ['POST'],
     authLevel: 'anonymous',
     handler: async (request, context) => {
-        const count = await redis.incr("counter");
+        const body = await request.json();
 
-        console.log(`Counter: ${count}`);
+        try {
+            const key = crypto.randomUUID();
 
-        return { body: `${count}` };
+            await redis.set(key, body, { ex: 300 });
 
-        return { body: 'Hello from Encrypt' };
+            return { body: key };
+        } catch (error) {
+            console.log(error);
+            return { status: 500, body: `Error: $(error)` };
+        }
     }
 });

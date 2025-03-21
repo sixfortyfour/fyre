@@ -35,7 +35,7 @@
                         <textarea name="message" required x-model="formData.message" class="w-full h-96 p-4" rows="10" placeholder="Paste your secret here..."></textarea>
                         <button class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Get link</button>
                     </div>
-                    <div x-text="formMessage"></div>
+                    <div x-data="{ open: false }" x-text="formMessage"></div>
                 </form>
             </div>
         </main>
@@ -49,10 +49,14 @@
                     formData: {
                     message: "",
                 },
+                open: false,
                 formMessage: "",
+                formLoading: false,
+                buttonText: "Get link",
                 submitForm() {
                     console.log('Submitting form');
                     this.formMessage = "";
+                    this.formLoading = false;
                     fetch(`/api/encrypt`, {
                         method: "POST",
                         headers: {
@@ -60,11 +64,13 @@
                             Accept: "application/json",
                         },
                         body: JSON.stringify(this.formData),
-                    }).then(() => {
-                        this.formData.message = "";
-                        this.formMessage = "Form successfully submitted.";
+                    }).then((response) => {
+                        this.formMessage = response.text();
+                        this.open = true;
                     }).catch(() => {
-                        this.formMessage = "An error occurred. Please try again.";
+                        console.error = "An error occurred. Please try again.";
+                    }).finally(() => {
+                        this.formLoading = false;
                     });
                 }
         }};
