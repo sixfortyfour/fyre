@@ -20,7 +20,7 @@ app.http('encrypt', {
             return { body: key };
         } catch (error) {
             console.log(error);
-            return { status: 500, body: `Error: $(error)` };
+            return { status: 500, body: `Error: ${error}` };
         }
     }
 });
