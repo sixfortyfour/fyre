@@ -30,13 +30,27 @@
                         An experimental project inspired by <a href="https://pyre.link/" class="text-blue-600 hover:underline" target="_blank">Pyre</a> and <a href="https://envflow.laravel.cloud/" class="text-blue-600 hover:underline" target="_blank">EnvFlow</a> using <a href="https://upstash.com/" class="text-blue-600 hover:underline" target="_blank">Upstash Redis</a> as the data store.
                     </p>
                 </div>
-                <form x-data="messageForm()" @submit.prevent="submitForm">
-                    <div class="grid gap-6">
-                        <textarea name="message" required x-model="formData.message" class="w-full h-96 p-4" rows="10" placeholder="Paste your secret here..."></textarea>
-                        <button class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Get link</button>
+                <div x-data="messageForm()" >
+                    <form x-show="showForm" @submit.prevent="submitForm">
+                        <div class="grid gap-6">
+                            <textarea name="message" required x-model="formData.message" class="w-full h-96 p-4" rows="10" placeholder="Paste your secret here..."></textarea>
+                            <button class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Get link</button>
+                        </div>
+                    </form>
+                    <div x-show="!showForm">
+                        <div class="w-full">
+                            <div class="mb-2 flex justify-between items-center">
+                                <label for="website-url" class="text-sm font-medium text-gray-900 dark:text-white">Copy the link below:</label>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg dark:bg-gray-600 dark:text-white dark:border-gray-600">URL</span>
+                                <input type="text" class="w-full bg-gray-50 border border-gray-300 p-2" x-bind:value="messageLink()" readonly disabled/>
+                                <button type="button" class="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg dark:bg-gray-600 dark:text-white dark:border-gray-600">Copy</button>
+                            </div>
+                        </div>
+
                     </div>
-                    <div x-data="{ open: false }" x-text="formMessage"></div>
-                </form>
+                </div>
             </div>
         </main>
         <footer class="sticky z-50 bg-gray-700 text-white bottom-0 p-4">
@@ -49,10 +63,13 @@
                     formData: {
                     message: "",
                 },
-                open: false,
-                formMessage: "",
+                showForm: true,
+                messageKey: "",
                 formLoading: false,
                 buttonText: "Get link",
+                messageLink() {
+                    return window.location.href + `?${this.messageKey}`;
+                },
                 submitForm() {
                     console.log('Submitting form');
                     this.formMessage = "";
@@ -65,8 +82,10 @@
                         },
                         body: JSON.stringify(this.formData),
                     }).then((response) => {
-                        this.formMessage = response.text();
-                        this.open = true;
+                        response.text().then((data) => {
+                            this.messageKey = data;
+                        });
+                        this.showForm = false;
                     }).catch(() => {
                         console.error = "An error occurred. Please try again.";
                     }).finally(() => {
