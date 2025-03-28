@@ -13,8 +13,9 @@
     <div class="flex flex-col min-h-screen">
         <header class="p-5 bg-gray-700 text-white">
             <nav>
-                <div class="text-3xl font-bold">
-                Fyre <i class="fa fa-solid fa-fire" style="color: #ff8040;"></i>
+                <div class="text-xl relative flex items-center justify-between">
+                    <a href="index.html">Fyre <i class="fa fa-solid fa-fire" style="color: #ff8040;"></i></a>
+                    <a href="about.html" class="text-right">About</a>
                 </div>
             </nav>
         </header>
@@ -40,15 +41,13 @@
                     <div x-show="!showForm">
                         <div class="w-full">
                             <div class="mb-2 flex justify-between items-center">
-                                <label for="website-url" class="text-sm font-medium text-gray-900 dark:text-white">Copy the link below:</label>
+                                <label for="website-url" class="text-sm font-medium text-gray-900 dark:text-white">Share the link below:</label>
                             </div>
-                            <div class="flex items-center">
-                                <span class="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg dark:bg-gray-600 dark:text-white dark:border-gray-600">URL</span>
-                                <input type="text" class="w-full bg-gray-50 border border-gray-300 p-2" x-bind:value="messageLink()" readonly disabled/>
-                                <button type="button" class="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg dark:bg-gray-600 dark:text-white dark:border-gray-600">Copy</button>
+                            <div class="flex items-center mb-2">
+                                <input id="link" type="text" class="w-full bg-gray-50 border border-gray-300 p-2" x-bind:value="messageLink()" readonly disabled/>
+                                <button type="button" @click="copyLink" class="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg dark:bg-gray-600 dark:text-white dark:border-gray-600">Copy</button>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -91,7 +90,15 @@
                     }).finally(() => {
                         this.formLoading = false;
                     });
-                }
+                },
+                copyLink() {
+                    const link = document.getElementById("link");
+                    link.select();
+                    document.execCommand("copy");
+                    
+                    // Copy the text inside the text field
+                    navigator.clipboard.writeText(link.value);
+                },
         }};
     </script>
 </body>
