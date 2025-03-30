@@ -9,7 +9,7 @@
     <script src="https://kit.fontawesome.com/52265aac62.js" crossorigin="anonymous"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body>
+<body x-init="checkUrl()" x-data="messageForm()">
     <div class="flex flex-col min-h-screen">
         <header class="p-5 bg-gray-700 text-white">
             <nav>
@@ -19,7 +19,7 @@
                 </div>
             </nav>
         </header>
-        <main class="flex-grow" x-data>
+        <main class="flex-grow">
             <div class="relative mx-auto max-w-2xl px-6">
                 <div class="flex flex-col items-center justify-center py-12">
                     <h1 class="text-3xl text-center font-bold pb-4" style="color: #ff8040;">Short lived messages that burn away</h1>
@@ -31,24 +31,35 @@
                         An experimental project inspired by <a href="https://pyre.link/" class="text-blue-600 hover:underline" target="_blank">Pyre</a> and <a href="https://envflow.laravel.cloud/" class="text-blue-600 hover:underline" target="_blank">EnvFlow</a> using <a href="https://upstash.com/" class="text-blue-600 hover:underline" target="_blank">Upstash Redis</a> as the data store.
                     </p>
                 </div>
-                <div x-data="messageForm()" >
-                    <form x-show="showForm" @submit.prevent="submitForm">
+                <div>
+                    <template x-if="showForm">
+                        <form @submit.prevent="submitForm">
+                            <div class="grid gap-6">
+                                <textarea name="message" required x-model="formData.message" class="w-full h-96 p-4" rows="10" placeholder="Paste your secret here..."></textarea>
+                                <button class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Get link</button>
+                            </div>
+                        </form>
+                    </template>
+                    <template x-if="showUrl">
+                        <div>
+                            <div class="w-full">
+                                <div class="mb-2 flex justify-between items-center">
+                                    <label for="website-url" class="text-sm font-medium text-gray-900 dark:text-white">Share the link below:</label>
+                                </div>
+                                <div class="flex items-center mb-2">
+                                    <input id="link" type="text" class="w-full bg-gray-50 border border-gray-300 p-2" x-bind:value="messageLink()" readonly disabled/>
+                                    <button type="button" @click="copyLink" class="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg dark:bg-gray-600 dark:text-white dark:border-gray-600">Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    <template x-if="showMessage">
                         <div class="grid gap-6">
-                            <textarea name="message" required x-model="formData.message" class="w-full h-96 p-4" rows="10" placeholder="Paste your secret here..."></textarea>
-                            <button class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Get link</button>
-                        </div>
-                    </form>
-                    <div x-show="!showForm">
-                        <div class="w-full">
-                            <div class="mb-2 flex justify-between items-center">
-                                <label for="website-url" class="text-sm font-medium text-gray-900 dark:text-white">Share the link below:</label>
-                            </div>
-                            <div class="flex items-center mb-2">
-                                <input id="link" type="text" class="w-full bg-gray-50 border border-gray-300 p-2" x-bind:value="messageLink()" readonly disabled/>
-                                <button type="button" @click="copyLink" class="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg dark:bg-gray-600 dark:text-white dark:border-gray-600">Copy</button>
+                            <div>
+                                <textarea id="message" readonly x-model="messageText" class="w-full h-96 p-4" rows="10" placeholder="This is your secret..."></textarea>
                             </div>
                         </div>
-                    </div>
+                    </template>
                 </div>
             </div>
         </main>
@@ -63,7 +74,10 @@
                     message: "",
                 },
                 showForm: true,
+                showMessage: false,
+                showUrl: false,
                 messageKey: "",
+                messageText: "",
                 formLoading: false,
                 buttonText: "Get link",
                 messageLink() {
@@ -85,6 +99,7 @@
                             this.messageKey = data;
                         });
                         this.showForm = false;
+                        this.showUrl = true;
                     }).catch(() => {
                         console.error = "An error occurred. Please try again.";
                     }).finally(() => {
@@ -99,6 +114,33 @@
                     // Copy the text inside the text field
                     navigator.clipboard.writeText(link.value);
                 },
+                checkUrl() {
+                    console.log('Page loaded');
+        
+                    let key = window.location.search.substring(1);
+                    console.log('Key:', key);
+
+                    if (key.length > 0) {
+                        this.showMessage = true;
+                        this.showForm = false;
+                        this.showUrl = false;
+
+                        fetch(`/api/decrypt/${key}`, {
+                            method: "GET",
+                            headers: {
+                                "Content-Type": "application/json",
+                                Accept: "application/json",
+                            }}).then((response) => {
+                                response.json().then((json) => {
+                                    console.log('JSON:', json.message);
+                                    this.messageText = json.message;
+                                });
+                            })
+                            .catch(() => {
+                                console.error = "An error occurred. Please try again.";
+                            });
+                    } 
+            },
         }};
     </script>
 </body>
