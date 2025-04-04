@@ -9,7 +9,7 @@
     <script src="https://kit.fontawesome.com/52265aac62.js" crossorigin="anonymous"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body x-init="checkUrl()" x-data="messageForm()">
+<body x-init="checkUrl()" x-data="app()">
     <div class="flex flex-col min-h-screen">
         <header class="p-5 bg-gray-700 text-white">
             <nav>
@@ -32,16 +32,16 @@
                     </p>
                 </div>
                 <div>
-                    <template x-if="showForm">
-                        <form @submit.prevent="submitForm">
+                    <template x-if="global.showForm">
+                        <form @submit.prevent="submitForm" x-data="messageForm()">
                             <div class="grid gap-6">
                                 <textarea name="message" required x-model="formData.message" class="w-full h-96 p-4" rows="10" placeholder="Paste your secret here..."></textarea>
                                 <button class="text-white bg-red-700 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600">Get link</button>
                             </div>
                         </form>
                     </template>
-                    <template x-if="showUrl">
-                        <div>
+                    <template x-if="global.showUrl">
+                        <div x-data="linkForm()">
                             <div class="w-full">
                                 <div class="mb-2 flex justify-between items-center">
                                     <label for="website-url" class="text-sm font-medium text-gray-900 dark:text-white">Share the link below:</label>
@@ -53,7 +53,7 @@
                             </div>
                         </div>
                     </template>
-                    <template x-if="showMessage">
+                    <template x-if="global.showMessage" x-data="{open: true}">
                         <div class="grid gap-6">
                             <div>
                                 <textarea id="message" readonly x-model="messageText" class="w-full h-96 p-4" rows="10" placeholder="This is your secret..."></textarea>
@@ -68,62 +68,42 @@
         </footer>
     </div>
     <script>
-        function messageForm() {
-                return {
-                    formData: {
-                    message: "",
-                },
-                showForm: true,
-                showMessage: false,
-                showUrl: false,
-                messageKey: "",
+        let global = {
+            showForm: true,
+            showUrl: false,
+            showMessage: false
+        };
+
+        // set appState to be reactive
+        document.addEventListener("alpine:init", () => {
+            global = Alpine.reactive(global);
+
+            Alpine.store('message', {
+                key: ""
+            });
+        });
+
+        const getKey = () => {
+            return Alpine.store('message').key;
+        };
+
+        const setKey = (key) => {
+            Alpine.store('message').key = key;
+        };
+
+        function app() {
+            return {
                 messageText: "",
-                formLoading: false,
-                buttonText: "Get link",
-                messageLink() {
-                    return window.location.href + `?${this.messageKey}`;
-                },
-                submitForm() {
-                    console.log('Submitting form');
-                    this.formMessage = "";
-                    this.formLoading = false;
-                    fetch(`/api/encrypt`, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Accept: "application/json",
-                        },
-                        body: JSON.stringify(this.formData),
-                    }).then((response) => {
-                        response.text().then((data) => {
-                            this.messageKey = data;
-                        });
-                        this.showForm = false;
-                        this.showUrl = true;
-                    }).catch(() => {
-                        console.error = "An error occurred. Please try again.";
-                    }).finally(() => {
-                        this.formLoading = false;
-                    });
-                },
-                copyLink() {
-                    const link = document.getElementById("link");
-                    link.select();
-                    document.execCommand("copy");
-                    
-                    // Copy the text inside the text field
-                    navigator.clipboard.writeText(link.value);
-                },
                 checkUrl() {
-                    console.log('Page loaded');
+                    console.log('app loaded');
         
                     let key = window.location.search.substring(1);
                     console.log('Key:', key);
 
                     if (key.length > 0) {
-                        this.showMessage = true;
-                        this.showForm = false;
-                        this.showUrl = false;
+                        global.showMessage = true;
+                        global.showForm = false;
+                        global.showUrl = false;
 
                         fetch(`/api/decrypt/${key}`, {
                             method: "GET",
@@ -139,9 +119,56 @@
                             .catch(() => {
                                 console.error = "An error occurred. Please try again.";
                             });
-                    } 
-            },
+                    }
+        }}};
+
+        function linkForm() {
+            return {
+                messageLink() {
+                    console.log(`messageLink called: ${getKey()}`);
+                    return window.location.href + `?${getKey()}`;
+                },
+                copyLink() {
+                    const link = document.getElementById("link");
+                    link.select();
+                    document.execCommand("copy");
+                    
+                    // Copy the text inside the text field
+                    navigator.clipboard.writeText(link.value);
+                },
         }};
+
+        function messageForm() {
+                return {
+                    formData: {
+                    message: "",
+                },
+                messageText: "",
+                buttonText: "Get link",
+                
+                async submitForm() {
+                    console.log('Submitting form');
+                    this.formMessage = "";
+                    await fetch(`/api/encrypt`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                        },
+                        body: JSON.stringify(this.formData),
+                    }).then((response) => {
+                        response.text().then((data) => {
+                            setKey(data);
+                        });
+                        global.showForm = false;
+                        global.showUrl = true;
+                    }).catch(() => {
+                        console.error = "An error occurred. Please try again.";
+                    }).finally(() => {
+                        console.log('Submitted form');
+                    });
+                }
+    }};
     </script>
 </body>
 </html>
