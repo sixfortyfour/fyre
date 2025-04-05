@@ -9,6 +9,12 @@
     <script src="https://kit.fontawesome.com/52265aac62.js" crossorigin="anonymous"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="./js/app.js"></script>
+    <style>
+          .blur{
+            -webkit-filter: blur(5px); /* Chrome, Safari, Opera */
+            filter: blur(5px);
+          }
+    </style>
 </head>
 <body>
     <div class="flex flex-col min-h-screen">
@@ -72,9 +78,8 @@
                             </p>
                         </div>
                         <div class="grid gap-6">
-                            <div>
-                                <textarea id="message" x-data="message" x-model="text" readonly class="w-full h-96 p-4" rows="10" placeholder="This is your secret..."></textarea>
-                            </div>
+                            <textarea id="message" x-data="message" x-model="text" readonly class="w-full h-96 p-4 blur" rows="10" placeholder="This is your secret..."></textarea>
+                            <button @click="document.getElementById('message').classList.remove('blur');" class="text-white bg-red-700 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600">View message</button>
                         </div>
                     </div>
                 </template>
