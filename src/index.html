@@ -22,26 +22,34 @@
         </header>
         <main class="flex-grow" x-data>
             <div class="relative mx-auto max-w-2xl px-6">
-                <div class="flex flex-col items-center justify-center py-12">
-                    <h1 class="text-3xl text-center font-bold pb-4" style="color: #ff8040;">Short lived messages that burn away</h1>
-                    <p class="text-gray-600 pb-4">
-                        With Fyre, you can send messages using short-lived, one-time links that burn away after an hour or as soon as they’re viewed.
-                        
-                    </p>
-                    <p class="text-gray-600">
-                        An experimental project inspired by <a href="https://pyre.link/" class="text-blue-600 hover:underline" target="_blank">Pyre</a> and <a href="https://envflow.laravel.cloud/" class="text-blue-600 hover:underline" target="_blank">EnvFlow</a> using <a href="https://upstash.com/" class="text-blue-600 hover:underline" target="_blank">Upstash Redis</a> as the data store.
-                    </p>
-                </div>
-                <div>
-                    <template x-if="global.showForm">
+                <template x-if="global.showForm">
+                    <div>
+                        <div class="flex flex-col items-center justify-center py-12">
+                            <h1 class="text-3xl text-center font-bold pb-4" style="color: #ff8040;">Short lived messages that burn away</h1>
+                            <p class="text-gray-600 pb-4">
+                                With Fyre, you can send messages using short-lived, one-time links that burn away after an hour or as soon as they’re viewed.
+                                
+                            </p>
+                            <p class="text-gray-600">
+                                An experimental project inspired by <a href="https://pyre.link/" class="text-blue-600 hover:underline" target="_blank">Pyre</a> and <a href="https://envflow.laravel.cloud/" class="text-blue-600 hover:underline" target="_blank">EnvFlow</a> using <a href="https://upstash.com/" class="text-blue-600 hover:underline" target="_blank">Upstash Redis</a> as the data store.
+                            </p>
+                        </div>
                         <form @submit.prevent="submitForm" x-data="messageForm()">
                             <div class="grid gap-6">
                                 <textarea name="message" required x-model="formData.message" class="w-full h-96 p-4" rows="10" placeholder="Paste your secret here..."></textarea>
                                 <button class="text-white bg-red-700 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600">Get link</button>
                             </div>
                         </form>
-                    </template>
-                    <template x-if="global.showUrl">
+                    </div>
+                </template>
+                <template x-if="global.showUrl">
+                    <div>
+                        <div class="flex flex-col items-center justify-center py-12">
+                            <h1 class="text-3xl text-center font-bold pb-4" style="color: #ff8040;">Successfully encrypted your message.</h1>
+                            <p class="text-gray-600 pb-4">
+                                Your message is now encrypted and can be accessed using the link below. The link will expire in 1 hour or after it has been viewed once.
+                            </p>
+                        </div>
                         <div x-data="linkForm()">
                             <div class="w-full">
                                 <div class="mb-2 flex justify-between items-center">
@@ -53,15 +61,23 @@
                                 </div>
                             </div>
                         </div>
-                    </template>
-                    <template x-if="global.showMessage">
+                    </div>
+                </template>
+                <template x-if="global.showMessage">
+                    <div>
+                        <div class="flex flex-col items-center justify-center py-12">
+                            <h1 class="text-3xl text-center font-bold pb-4" style="color: #ff8040;">Successfully decrypted your message.</h1>
+                            <p class="text-gray-600 pb-4">
+                                This is the message you were looking for. It will be deleted after you close this page.
+                            </p>
+                        </div>
                         <div class="grid gap-6">
                             <div>
                                 <textarea id="message" x-data="message" x-model="text" readonly class="w-full h-96 p-4" rows="10" placeholder="This is your secret..."></textarea>
                             </div>
                         </div>
-                    </template>
-                </div>
+                    </div>
+                </template>
             </div>
         </main>
         <footer class="sticky z-50 bg-gray-700 text-white bottom-0 p-4">
