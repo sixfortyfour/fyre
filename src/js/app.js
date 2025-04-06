@@ -1,23 +1,17 @@
-function global() {
-    return {
-        showForm: true,
-        showUrl: false,
-        showMessage: false
-    }
-}
 
 document.addEventListener("alpine:init", () => {
-    // set global to be reactive
-    global = Alpine.reactive(global());
+    Alpine.store('view', {
+        current: 'form',
+    });
 
-    console.log('State:', global.showForm, global.showUrl, global.showMessage);
+    Alpine.store("message", {
+        key: "",
+    });
 
     let key = window.location.search.substring(1);
 
     if (key.length > 0) {
-        global.showMessage = true;
-        global.showForm = false;
-        global.showUrl = false;
+        Alpine.store('view').current = 'message';
     }
 
     Alpine.data("message", () => ({
@@ -47,10 +41,6 @@ document.addEventListener("alpine:init", () => {
                 });
 
     }}));
-
-    Alpine.store("message", {
-        key: "",
-    });
 });
 
 const getKey = () => {
@@ -59,4 +49,12 @@ const getKey = () => {
 
 const setKey = (key) => {
     Alpine.store('message').key = key;
+};
+
+const setView = (view) => {
+    Alpine.store('view').current = view;
+};
+
+const getView = () => {
+    return Alpine.store('view').current;
 };
