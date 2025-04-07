@@ -28,7 +28,7 @@
         </header>
         <main class="flex-grow" x-data>
             <div class="relative mx-auto max-w-2xl px-6">
-                <template x-if="getView() == 'form'">
+                <template x-if="$store.main.showForm()">
                     <div>
                         <div class="flex flex-col items-center justify-center py-12">
                             <h1 class="text-3xl text-center font-bold pb-4" style="color: #ff8040;">Short lived messages that burn away</h1>
@@ -48,7 +48,7 @@
                         </form>
                     </div>
                 </template>
-                <template x-if="getView() == 'url'">
+                <template x-if="$store.main.showUrl()">
                     <div>
                         <div class="flex flex-col items-center justify-center py-12">
                             <h1 class="text-3xl text-center font-bold pb-4" style="color: #ff8040;">Successfully encrypted your message.</h1>
@@ -69,7 +69,7 @@
                         </div>
                     </div>
                 </template>
-                <template x-if="getView() == 'message'">
+                <template x-if="$store.main.showMessage()">
                     <div>
                         <div class="flex flex-col items-center justify-center py-12">
                             <h1 class="text-3xl text-center font-bold pb-4" style="color: #ff8040;">Successfully decrypted your message.</h1>
@@ -129,7 +129,7 @@
                             setKey(data);
                         });
 
-                        setView("url");
+                        Alpine.store('main').setView("url");
                     }).catch(() => {
                         console.error = "An error occurred. Please try again.";
                     }).finally(() => {

@@ -1,8 +1,25 @@
-
 document.addEventListener("alpine:init", () => {
-    Alpine.store('view', {
-        current: 'form',
+    const state = Alpine.reactive({
+        view: "form",
+        setView(view) {
+            console.log('setView', view);
+            this.view = view;
+        },
+        showForm() {
+            console.log('showForm', this.view === "form");
+            return this.view === "form";
+        },
+        showUrl() {
+            console.log('showUrl', this.view === "url");
+            return this.view === "url";
+        },
+        showMessage() {
+            console.log('showMessage', this.view === "message");
+            return this.view === "message";
+        },
     });
+
+    Alpine.store('main', state);
 
     Alpine.store("message", {
         key: "",
@@ -11,7 +28,7 @@ document.addEventListener("alpine:init", () => {
     let key = window.location.search.substring(1);
 
     if (key.length > 0) {
-        Alpine.store('view').current = 'message';
+        Alpine.store('main').view = 'message';
     }
 
     Alpine.data("message", () => ({
@@ -49,12 +66,4 @@ const getKey = () => {
 
 const setKey = (key) => {
     Alpine.store('message').key = key;
-};
-
-const setView = (view) => {
-    Alpine.store('view').current = view;
-};
-
-const getView = () => {
-    return Alpine.store('view').current;
 };
