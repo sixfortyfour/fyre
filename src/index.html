@@ -40,12 +40,14 @@
                                 An experimental project inspired by <a href="https://pyre.link/" class="text-blue-600 hover:underline" target="_blank">Pyre</a> and <a href="https://envflow.laravel.cloud/" class="text-blue-600 hover:underline" target="_blank">EnvFlow</a> using <a href="https://upstash.com/" class="text-blue-600 hover:underline" target="_blank">Upstash Redis</a> as the data store.
                             </p>
                         </div>
-                        <form @submit.prevent="submitForm" x-data="messageForm()">
-                            <div class="grid gap-6">
-                                <textarea name="message" required x-model="formData.message" class="w-full h-96 p-4" rows="10" placeholder="Paste your secret here..."></textarea>
-                                <button class="text-white bg-red-700 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600">Get link</button>
-                            </div>
-                        </form>
+                        <div x-data="form">
+                            <form @submit.prevent="handleSubmit">
+                                <div class="grid gap-6">
+                                    <textarea name="message" required x-model="message" class="w-full h-96 p-4" rows="10" placeholder="Paste your secret here..."></textarea>
+                                    <button class="text-white bg-red-700 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600">Get link</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </template>
                 <template x-if="$store.main.showUrl()">
@@ -56,21 +58,21 @@
                                 Your message is now encrypted and can be accessed using the link below. The link will expire in 1 hour or after it has been viewed once.
                             </p>
                         </div>
-                        <div x-data="linkForm()">
+                        <div x-data="link">
                             <div class="w-full">
                                 <div class="mb-2 flex justify-between items-center">
                                     <label for="website-url" class="text-sm font-medium text-gray-900 dark:text-white">Share the link below:</label>
                                 </div>
                                 <div class="flex items-center mb-2">
-                                    <input id="link" type="text" class="w-full bg-gray-50 border border-gray-300 p-2" x-bind:value="messageLink()" readonly disabled/>
-                                    <button type="button" @click="copyLink" class="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg dark:bg-gray-600 dark:text-white dark:border-gray-600">Copy</button>
+                                    <input id="link" type="text" class="w-full bg-gray-50 border border-gray-300 p-2" x-bind:value="messageLink" readonly disabled/>
+                                    <button type="button" x-bind="trigger" class="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg dark:bg-gray-600 dark:text-white dark:border-gray-600">Copy</button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </template>
                 <template x-if="$store.main.showMessage()">
-                    <div>
+                    <div x-data="message">
                         <div class="flex flex-col items-center justify-center py-12">
                             <h1 class="text-3xl text-center font-bold pb-4" style="color: #ff8040;">Successfully decrypted your message.</h1>
                             <p class="text-gray-600 pb-4">
@@ -78,7 +80,7 @@
                             </p>
                         </div>
                         <div class="grid gap-6">
-                            <textarea id="message" x-data="message" x-model="text" readonly class="w-full h-96 p-4 blur" rows="10" placeholder="This is your secret..."></textarea>
+                            <textarea id="message" x-model="text" readonly class="w-full h-96 p-4 blur" rows="10" placeholder="This is your secret..."></textarea>
                             <button @click="document.getElementById('message').classList.remove('blur');" class="text-white bg-red-700 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600">View message</button>
                         </div>
                     </div>
@@ -89,54 +91,5 @@
             <p>&copy; 2025 sixfortyfour</p>
         </footer>
     </div>
-    <script>
-        function linkForm() {
-            return {
-                messageLink() {
-                    console.log(`messageLink called: ${getKey()}`);
-                    return window.location.href + `?${getKey()}`;
-                },
-                copyLink() {
-                    const link = document.getElementById("link");
-                    link.select();
-                    document.execCommand("copy");
-                    
-                    // Copy the text inside the text field
-                    navigator.clipboard.writeText(link.value);
-                },
-        }};
-
-        function messageForm() {
-                return {
-                    formData: {
-                    message: "",
-                },
-                messageText: "",
-                buttonText: "Get link",
-                
-                async submitForm() {
-                    console.log('Submitting form');
-                    this.formMessage = "";
-                    await fetch(`/api/encrypt`, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Accept: "application/json",
-                        },
-                        body: JSON.stringify(this.formData),
-                    }).then((response) => {
-                        response.text().then((data) => {
-                            setKey(data);
-                        });
-
-                        Alpine.store('main').setView("url");
-                    }).catch(() => {
-                        console.error = "An error occurred. Please try again.";
-                    }).finally(() => {
-                        console.log('Submitted form');
-                    });
-                }
-    }};
-    </script>
 </body>
 </html>

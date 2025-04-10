@@ -31,6 +31,35 @@ document.addEventListener("alpine:init", () => {
         Alpine.store('main').view = 'message';
     }
 
+    Alpine.data("link", () => ({
+        get messageLink() {
+            console.log(`messageLink called: ${Alpine.store('message').key}`);
+            return window.location.href + `?${Alpine.store('message').key}`;
+        },
+        trigger: {
+            ["@click"]() {
+                copyLinkToClipboard();
+            }
+        },
+    }));
+
+    Alpine.data("form", () => ({
+        buttonText: "Get link",
+        message: "",
+        
+        handleSubmit(event) {
+            console.log('Submitting form');
+            makeRequest(event.target, (response) => {
+                response.text().then((data) => {
+                    setKey(data);
+                });
+
+                Alpine.store('main').setView("url");
+                console.log('Submitted form');
+            });
+          },
+    }));
+
     Alpine.data("message", () => ({
         text: "",
         init() {
@@ -60,10 +89,28 @@ document.addEventListener("alpine:init", () => {
     }}));
 });
 
-const getKey = () => {
-    return Alpine.store('message').key;
-};
-
 const setKey = (key) => {
     Alpine.store('message').key = key;
 };
+
+function copyLinkToClipboard() {
+    const link = document.getElementById("link");
+    link.select();
+    document.execCommand("copy");
+    
+    // Copy the text inside the text field
+    navigator.clipboard.writeText(link.value);
+}
+
+function makeRequest(form, onComplete) {
+    const formData = new FormData(form);
+    const json = Object.fromEntries(formData.entries());
+    fetch(`/api/encrypt`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+        },
+        body: JSON.stringify(json),
+    }).then(onComplete);
+  }
