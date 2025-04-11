@@ -1,6 +1,15 @@
 document.addEventListener("alpine:init", () => {
     const state = Alpine.reactive({
         view: "form",
+        init() {
+            let key = window.location.search.substring(1);
+
+            console.log('init', key);
+
+            if (key.length > 0) {
+                this.view = 'message';
+            }
+        },
         setView(view) {
             console.log('setView', view);
             this.view = view;
@@ -23,13 +32,26 @@ document.addEventListener("alpine:init", () => {
 
     Alpine.store("message", {
         key: "",
-    });
+    });  
 
-    let key = window.location.search.substring(1);
+    Alpine.data("form", () => ({
+        buttonText: "Get link",
+        message: "",
+        
+        handleSubmit(event) {
+            console.log('Submitting form');
+            this.buttonText = "Encrypting message, please wait...";
 
-    if (key.length > 0) {
-        Alpine.store('main').view = 'message';
-    }
+            makeRequest(event.target, (response) => {
+                response.text().then((data) => {
+                    setKey(data);
+                });
+
+                Alpine.store('main').setView("url");
+                console.log('Submitted form');
+            });
+          },
+    }));
 
     Alpine.data("link", () => ({
         get messageLink() {
@@ -43,35 +65,23 @@ document.addEventListener("alpine:init", () => {
         },
     }));
 
-    Alpine.data("form", () => ({
-        buttonText: "Get link",
-        message: "",
-        
-        handleSubmit(event) {
-            console.log('Submitting form');
-            makeRequest(event.target, (response) => {
-                response.text().then((data) => {
-                    setKey(data);
-                });
-
-                Alpine.store('main').setView("url");
-                console.log('Submitted form');
-            });
-          },
-    }));
-
     Alpine.data("message", () => ({
         text: "",
+        key: "",
         init() {
-            if (key.length > 0) {
-                this.getMessageByKey(key);
+            this.key = window.location.search.substring(1);
+
+            console.log('init', this.key);
+
+            if (this.key.length > 0) {
+                this.getMessageByKey(this.key);
             }
         },
         
         getMessageByKey() {
             console.log('getMessageByKey');
 
-            fetch(`/api/decrypt/${key}`, {
+            fetch(`/api/decrypt/${this.key}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
