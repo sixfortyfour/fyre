@@ -4,26 +4,20 @@ document.addEventListener("alpine:init", () => {
         init() {
             let key = window.location.search.substring(1);
 
-            console.log('init', key);
-
             if (key.length > 0) {
                 this.view = 'message';
             }
         },
         setView(view) {
-            console.log('setView', view);
             this.view = view;
         },
         showForm() {
-            console.log('showForm', this.view === "form");
             return this.view === "form";
         },
         showUrl() {
-            console.log('showUrl', this.view === "url");
             return this.view === "url";
         },
         showMessage() {
-            console.log('showMessage', this.view === "message");
             return this.view === "message";
         },
     });
@@ -39,23 +33,20 @@ document.addEventListener("alpine:init", () => {
         message: "",
         
         handleSubmit(event) {
-            console.log('Submitting form');
             this.buttonText = "Encrypting message, please wait...";
 
-            makeRequest(event.target, (response) => {
+            postRequest(event.target, (response) => {
                 response.text().then((data) => {
                     setKey(data);
                 });
 
                 Alpine.store('main').setView("url");
-                console.log('Submitted form');
             });
           },
     }));
 
     Alpine.data("link", () => ({
         get messageLink() {
-            console.log(`messageLink called: ${Alpine.store('message').key}`);
             return window.location.href + `?${Alpine.store('message').key}`;
         },
         trigger: {
@@ -71,32 +62,14 @@ document.addEventListener("alpine:init", () => {
         init() {
             this.key = window.location.search.substring(1);
 
-            console.log('init', this.key);
-
             if (this.key.length > 0) {
-                this.getMessageByKey(this.key);
-            }
-        },
-        
-        getMessageByKey() {
-            console.log('getMessageByKey');
-
-            fetch(`/api/decrypt/${this.key}`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                }}).then((response) => {
+                getRequest(this.key, (response) => {
                     response.json().then((json) => {
-                        console.log('JSON:', json.message);
                         this.text = json.message;
                     });
-                })
-                .catch(() => {
-                    console.error = "An error occurred. Please try again.";
                 });
-
-    }}));
+            }
+        }}));
 });
 
 const setKey = (key) => {
@@ -112,7 +85,7 @@ function copyLinkToClipboard() {
     navigator.clipboard.writeText(link.value);
 }
 
-function makeRequest(form, onComplete) {
+function postRequest(form, onComplete) {
     const formData = new FormData(form);
     const json = Object.fromEntries(formData.entries());
     fetch(`/api/encrypt`, {
@@ -123,4 +96,13 @@ function makeRequest(form, onComplete) {
         },
         body: JSON.stringify(json),
     }).then(onComplete);
+  }
+
+  function getRequest(key, onComplete){
+    fetch(`/api/decrypt/${key}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+        }}).then(onComplete);
   }
