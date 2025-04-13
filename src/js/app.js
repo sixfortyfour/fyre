@@ -85,15 +85,17 @@ function copyLinkToClipboard() {
     navigator.clipboard.writeText(link.value);
 }
 
+const httpHeaders = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+};
+
 function postRequest(form, onComplete) {
     const formData = new FormData(form);
     const json = Object.fromEntries(formData.entries());
     fetch(`/api/encrypt`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
+        headers: httpHeaders,
         body: JSON.stringify(json),
     }).then(onComplete);
   }
@@ -101,8 +103,6 @@ function postRequest(form, onComplete) {
   function getRequest(key, onComplete){
     fetch(`/api/decrypt/${key}`, {
         method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        }}).then(onComplete);
+        headers: httpHeaders,
+    }).then(onComplete);
   }
