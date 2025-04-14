@@ -28,7 +28,7 @@ document.addEventListener("alpine:init", () => {
         key: "",
     });  
 
-    Alpine.data("form", () => ({
+    Alpine.data("encrypt", () => ({
         buttonText: "Get link",
         message: "",
         
@@ -56,7 +56,7 @@ document.addEventListener("alpine:init", () => {
         },
     }));
 
-    Alpine.data("message", () => ({
+    Alpine.data("decrypt", () => ({
         text: "",
         key: "",
         init() {
@@ -64,6 +64,11 @@ document.addEventListener("alpine:init", () => {
 
             if (this.key.length > 0) {
                 getRequest(this.key, (response) => {
+                    if (response.status === 404) {
+                        this.text = "Message not found. If you've already seen it, it's gone.";
+                        return;
+                    }
+
                     response.json().then((json) => {
                         this.text = json.message;
                     });
