@@ -1,4 +1,5 @@
 import { default as Alpine } from 'https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/+esm';
+import { getRequest, postRequest, copyLinkToClipboard } from './utility.js';
 
 window.Alpine = Alpine;
 
@@ -83,37 +84,6 @@ Alpine.data("decrypt", () => ({
 const setKey = (key) => {
     Alpine.store('message').key = key;
 };
-
-function copyLinkToClipboard() {
-    const link = document.getElementById("link");
-    link.select();
-    document.execCommand("copy");
-    
-    // Copy the text inside the text field
-    navigator.clipboard.writeText(link.value);
-}
-
-const httpHeaders = {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-};
-
-function postRequest(form, onComplete) {
-    const formData = new FormData(form);
-    const json = Object.fromEntries(formData.entries());
-    fetch(`/api/encrypt`, {
-        method: "POST",
-        headers: httpHeaders,
-        body: JSON.stringify(json),
-    }).then(onComplete);
-  }
-
-function getRequest(key, onComplete){
-    fetch(`/api/decrypt/${key}`, {
-        method: "GET",
-        headers: httpHeaders,
-    }).then(onComplete);
-}
 
 // start Alpine
 Alpine.start();
